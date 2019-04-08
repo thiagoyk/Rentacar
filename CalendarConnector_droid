@@ -54,7 +54,7 @@ namespace RentACar.Droid
             var eventUri = cr.Insert(CalendarContract.Events.ContentUri, eventValues);
             long eventID = long.Parse(eventUri.LastPathSegment);
 
-            await App.Current.MainPage.DisplayAlert("App", subject + "\r\n Start date: " + startTime + "\r\n Return date: " + endTime, "ok");
+            await App.Current.MainPage.DisplayAlert("App", "Event added", "ok");
         }
 
         private async Task RequestCalendarPermissions(DateTime startTime, DateTime endTime, string subject, string location, string details, bool isAllDay)
