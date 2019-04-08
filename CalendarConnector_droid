@@ -1,4 +1,6 @@
 using System;
+using System.Diagnostics;
+using System.Globalization;
 using System.Threading.Tasks;
 using Android;
 using Android.App;
@@ -7,11 +9,10 @@ using Android.OS;
 using Android.Provider;
 using Plugin.Permissions;
 using Plugin.Permissions.Abstractions;
-using RentACar.Control;
 using Xamarin.Forms;
 
-[assembly: Dependency(typeof(RentACar.Droid.CalendarConnector))]
-namespace RentACar.Droid
+[assembly: Dependency(typeof(Rentacar.Droid.CalendarConnector))]
+namespace Rentacar.Droid
 {
     public class CalendarConnector : ICalendarConnector
     {
@@ -45,6 +46,7 @@ namespace RentACar.Droid
             eventValues.Put(CalendarContract.Events.InterfaceConsts.CalendarId, 1);
             eventValues.Put(CalendarContract.Events.InterfaceConsts.Title, subject);
             eventValues.Put(CalendarContract.Events.InterfaceConsts.Description, details);
+            eventValues.Put(CalendarContract.Events.InterfaceConsts.EventLocation, location);
             eventValues.Put(CalendarContract.Events.InterfaceConsts.Dtstart, GetDateTimeMS(startTime));
             eventValues.Put(CalendarContract.Events.InterfaceConsts.Dtend, GetDateTimeMS(endTime));
             eventValues.Put(CalendarContract.Events.InterfaceConsts.EventTimezone, "UTC");
@@ -54,7 +56,7 @@ namespace RentACar.Droid
             var eventUri = cr.Insert(CalendarContract.Events.ContentUri, eventValues);
             long eventID = long.Parse(eventUri.LastPathSegment);
 
-            await App.Current.MainPage.DisplayAlert("App", "Event added", "ok");
+            await App.Current.MainPage.DisplayAlert("App", subject + "\r\n Start date: " + startTime + "\r\n Return date: " + endTime, "ok");
         }
 
         private async Task RequestCalendarPermissions(DateTime startTime, DateTime endTime, string subject, string location, string details, bool isAllDay)
@@ -94,6 +96,33 @@ namespace RentACar.Droid
             return (long)dateTime.ToUniversalTime().Subtract(
                      new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)
                     ).TotalMilliseconds;
+        }
+
+        public void getCalendar()
+        {
+            string[] projection = { "_id", "calendar_displayName" };
+            Android.Net.Uri calendars;
+            calendars = Android.Net.Uri.Parse("content://com.android.calendar/calendars");
+
+            ContentResolver contentResolver = Activity.ContentResolver;
+            var managedCursor = contentResolver.Query(calendars, projection, null, null, null);
+
+            if (managedCursor.MoveToFirst())
+            {
+                String calName;
+                String calID;
+                int cont = 0;
+                int nameCol = managedCursor.GetColumnIndex(projection[1]);
+                int idCol = managedCursor.GetColumnIndex(projection[0]);
+                do
+                {
+                    calName = managedCursor.GetString(nameCol);
+                    calID = managedCursor.GetString(idCol);
+                    cont++;
+                    System.Diagnostics.Debug.Write(calName + " | " + calID);
+                } while (managedCursor.MoveToNext());
+                managedCursor.Close();
+            }
         }
     }
 }
