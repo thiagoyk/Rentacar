@@ -98,7 +98,7 @@ namespace Rentacar.Droid
                     ).TotalMilliseconds;
         }
 
-        public void getCalendar()
+        public void GetCalendar()
         {
             string[] projection = { "_id", "calendar_displayName" };
             Android.Net.Uri calendars;
